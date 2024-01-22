@@ -1,0 +1,38 @@
+credentials:
+  users:
+    guest:
+      roles: [super]
+
+replication:
+  failover: off
+
+wal:
+  dir: '{{ instance_name }}'
+
+snapshot:
+  dir: '{{ instance_name }}'
+
+console:
+  socket: '{{ instance_name }}.control'
+
+app:
+  module: import_data
+
+metrics:
+  include: []
+
+groups:
+  group-001:
+    replicasets:
+      replicaset-001:
+        instances:
+          instance-001:
+            database:
+              mode: rw
+            iproto:
+              listen: 127.0.0.1:3301
+          instance-002:
+            database:
+              mode: rw
+            iproto:
+              listen: 127.0.0.1:3302
