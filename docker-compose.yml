@@ -1,0 +1,51 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    volumes:
+      - $PWD/pgmaster/:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: "pass"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "postgres"
+    ports:
+      - "5432:5432"
+
+  tarantooldb:
+    image: "tarantool/tarantool:1"
+    volumes:
+      - $PWD/tarantooldb/:/var/lib/tarantool
+    ports:
+      - 3301:3301
+
+  dbslave:
+    image: postgres
+    volumes:
+      - $PWD/pgslave/:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: "pass"
+      POSTGRES_USER: "postrges"
+      POSTGRES_DB: "postrges"
+    ports:
+      - "15432:5432"
+  
+  web:
+    build: .
+    command: >
+      sh -c "pip install --upgrade pip &&
+        pip install redis &&
+        pip install pika &&
+        pip install tarantool &&
+        python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/usr/src/dm_rest
+    ports:
+      - 8000:8000
+    depends_on:
+      - tarantooldb
+      - dbslave
+      - db
+
+volumes:
+  postrgers_data:
+  tarantooldb_data:
